@@ -18,14 +18,15 @@ package cn.wanghaomiao.seimi.http.okhttp;
 import okhttp3.OkHttpClient;
 
 /**
+ * 由原来的单例，改为Prototype
+ * 
  * @author SeimiMaster seimimaster@gmail.com
+ * @author mengran7
  * @since 2016/6/26.
  */
 public class OkHttpClientBuilderProvider {
-    private static class OkHttpclientBuilderProviderHolder {
-        public static OkHttpClientBuilderBox okHttpClientBuilderBox = new OkHttpClientBuilderBox();
-    }
+	
     public static OkHttpClient.Builder getInstance(){
-        return OkHttpclientBuilderProviderHolder.okHttpClientBuilderBox.instance();
+        return new OkHttpClientBuilderBox().instance();
     }
 }

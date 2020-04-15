@@ -15,18 +15,20 @@
  */
 package cn.wanghaomiao.seimi.def;
 
-import cn.wanghaomiao.seimi.annotation.Queue;
-import cn.wanghaomiao.seimi.core.SeimiQueue;
-import cn.wanghaomiao.seimi.struct.Request;
-import cn.wanghaomiao.seimi.utils.GenericUtils;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+
+import cn.wanghaomiao.seimi.annotation.Queue;
+import cn.wanghaomiao.seimi.core.SeimiQueue;
+import cn.wanghaomiao.seimi.struct.Request;
+import cn.wanghaomiao.seimi.utils.GenericUtils;
 
 /**
  * @author SeimiMaster seimimaster@gmail.com
@@ -37,6 +39,10 @@ public class DefaultLocalQueue implements SeimiQueue {
     private Map<String,LinkedBlockingQueue<Request>> queueMap = new HashMap<>();
     private Map<String,ConcurrentSkipListSet<String>> processedData = new HashMap<>();
     private Logger logger = LoggerFactory.getLogger(getClass());
+    
+    @Value("${semi.localqueue.size}")
+    private int localQueueSize;
+    
     @Override
     public Request bPop(String crawlerName) {
         try {
@@ -95,7 +101,7 @@ public class DefaultLocalQueue implements SeimiQueue {
     public LinkedBlockingQueue<Request> getQueue(String crawlerName){
         LinkedBlockingQueue<Request> queue = queueMap.get(crawlerName);
         if (queue==null){
-            queue = new LinkedBlockingQueue<>();
+            queue = new LinkedBlockingQueue<>(localQueueSize);
             queueMap.put(crawlerName,queue);
         }
         return queue;
