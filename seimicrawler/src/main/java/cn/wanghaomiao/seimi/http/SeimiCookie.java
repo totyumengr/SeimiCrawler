@@ -1,5 +1,8 @@
 package cn.wanghaomiao.seimi.http;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * http cookie要素，屏蔽hcclient与okhttp区别
  * @author github.com/zhegexiaohuozi seimimaster@gmail.com
@@ -49,4 +52,15 @@ public class SeimiCookie {
     public void setValue(String value) {
         this.value = value;
     }
+
+	@Override
+	public String toString() {
+		Map<String, String> cookie = new HashMap<String, String>(4);
+		cookie.put("domain", this.domain);
+		cookie.put("name", this.name);
+		cookie.put("value", this.value);
+		cookie.put("path", this.path);
+		return cookie.toString();
+	}
+    
 }
