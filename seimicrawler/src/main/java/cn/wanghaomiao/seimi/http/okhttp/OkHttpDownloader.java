@@ -15,6 +15,18 @@
  */
 package cn.wanghaomiao.seimi.http.okhttp;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang3.StringUtils;
+import org.seimicrawler.xpath.JXDocument;
+import org.seimicrawler.xpath.exception.XpathSyntaxErrorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.wanghaomiao.seimi.core.SeimiDownloader;
 import cn.wanghaomiao.seimi.http.SeimiCookie;
 import cn.wanghaomiao.seimi.http.SeimiHttpType;
@@ -23,20 +35,13 @@ import cn.wanghaomiao.seimi.struct.CrawlerModel;
 import cn.wanghaomiao.seimi.struct.Request;
 import cn.wanghaomiao.seimi.struct.Response;
 import cn.wanghaomiao.seimi.utils.StrFormatUtil;
-import org.seimicrawler.xpath.exception.XpathSyntaxErrorException;
-import org.seimicrawler.xpath.JXDocument;
+import okhttp3.Authenticator;
 import okhttp3.Cookie;
+import okhttp3.Credentials;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import okhttp3.Route;
 
 /**
  * @author SeimiMaster seimimaster@gmail.com
@@ -66,6 +71,28 @@ public class OkHttpDownloader implements SeimiDownloader {
         }
         if (crawlerModel.getStdProxy()!=null){
             hcBuilder.proxy(crawlerModel.getStdProxy());
+            String userName = request.getProxyAuthenticatorName();
+            String password = request.getProxyAuthenticatorPassword();
+            // 增加代理服务器认证支持。Add by MENGRAN
+            if (password != null && !password.isEmpty()) {
+            	logger.info("Set proxy authenticator userName={}", userName);
+            	hcBuilder.proxyAuthenticator(new Authenticator() {
+					
+					@Override
+					public okhttp3.Request authenticate(Route route, okhttp3.Response response) throws IOException {
+						
+						if (response.request().header("Proxy-Authorization") != null) {
+                            // Give up, we've already failed to authenticate.
+                            return null;
+                        }
+
+                        String credential = Credentials.basic(userName, password);
+                        return response.request().newBuilder()
+                                .header("Proxy-Authorization", credential)
+                                .build();
+					}
+				});
+            }
         }
         hcBuilder.readTimeout(crawlerModel.getHttpTimeOut(), TimeUnit.MILLISECONDS);
         hcBuilder.connectTimeout(crawlerModel.getHttpTimeOut(),TimeUnit.MILLISECONDS);

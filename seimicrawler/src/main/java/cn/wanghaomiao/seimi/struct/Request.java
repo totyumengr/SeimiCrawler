@@ -178,8 +178,31 @@ public class Request extends CommonObject {
      * 添加json request body支持
      */
     private String jsonBody;
+    
+    /**
+     * Add by MENGRAN
+     * 增加代理服务器认证支持
+     */
+    private String proxyAuthenticatorName;
+    private String proxyAuthenticatorPassword;
 
-    public void incrReqCount(){
+    public String getProxyAuthenticatorName() {
+		return proxyAuthenticatorName;
+	}
+
+	public void setProxyAuthenticatorName(String proxyAuthenticatorName) {
+		this.proxyAuthenticatorName = proxyAuthenticatorName;
+	}
+
+	public String getProxyAuthenticatorPassword() {
+		return proxyAuthenticatorPassword;
+	}
+
+	public void setProxyAuthenticatorPassword(String proxyAuthenticatorPassword) {
+		this.proxyAuthenticatorPassword = proxyAuthenticatorPassword;
+	}
+
+	public void incrReqCount(){
         this.currentReqCount +=1;
     }
 
