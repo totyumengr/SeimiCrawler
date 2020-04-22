@@ -83,6 +83,11 @@ public abstract class BaseSeimiCrawler implements SeimiCrawler {
     public void handleErrorRequest(Request request) {
         logger.info("Seimi got a error request={}", request);
     }
+    
+    // Add by MENGRAN
+    public void finallyRequest(Request request) {
+        logger.info("Seimi done a request={}", request);
+    }
 
     @Override
     public List<Request> startRequests() {

@@ -129,6 +129,8 @@ public class SeimiProcessor implements Runnable {
                     crawler.handleErrorRequest(request);
                 }
 
+            } finally {
+            	crawler.finallyRequest(request);
             }
         }
     }

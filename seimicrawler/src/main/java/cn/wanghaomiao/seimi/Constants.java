@@ -6,5 +6,5 @@ package cn.wanghaomiao.seimi;
  */
 public class Constants {
     public final static String SEIMI_CRAWLER_BOOTSTRAP_ENABLED = "seimi.crawler.enabled";
-    public final static int BASE_THREAD_NUM = 4;
+    public final static int BASE_THREAD_NUM = 1;
 }
