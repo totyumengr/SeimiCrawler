@@ -58,13 +58,21 @@ public class OkHttpDownloader implements SeimiDownloader {
     private okhttp3.Request.Builder currentRequestBuilder;
     private OkHttpClient okHttpClient;
     private okhttp3.Response lastResponse;
+    private OkHttpClient.Builder hcBuilder;
 
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    public OkHttpClient.Builder getHcBuilder() {
+		return hcBuilder;
+	}
+
+	public void setHcBuilder(OkHttpClient.Builder hcBuilder) {
+		this.hcBuilder = hcBuilder;
+	}
+
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public Response process(Request request) throws Exception {
         currentRequest = request;
-        OkHttpClient.Builder hcBuilder = OkHttpClientBuilderProvider.getInstance();
         if (crawlerModel.isUseCookie()){
             hcBuilder.cookieJar(crawlerModel.getOkHttpCookiesManager());
             addCookies(request.getUrl(),request.getSeimiCookies());
@@ -93,6 +101,9 @@ public class OkHttpDownloader implements SeimiDownloader {
 					}
 				});
             }
+        } else {
+        	// Add by MENGRAN
+        	hcBuilder.proxy(null);
         }
         hcBuilder.readTimeout(crawlerModel.getHttpTimeOut(), TimeUnit.MILLISECONDS);
         hcBuilder.connectTimeout(crawlerModel.getHttpTimeOut(),TimeUnit.MILLISECONDS);

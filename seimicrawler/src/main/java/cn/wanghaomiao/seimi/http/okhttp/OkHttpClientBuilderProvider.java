@@ -22,10 +22,9 @@ import okhttp3.OkHttpClient;
  * @since 2016/6/26.
  */
 public class OkHttpClientBuilderProvider {
-    private static class OkHttpclientBuilderProviderHolder {
-        public static OkHttpClientBuilderBox okHttpClientBuilderBox = new OkHttpClientBuilderBox();
-    }
+	
+	// Change to prototype by MENGRAN.
     public static OkHttpClient.Builder getInstance(){
-        return OkHttpclientBuilderProviderHolder.okHttpClientBuilderBox.instance();
+        return new OkHttpClientBuilderBox().instance();
     }
 }

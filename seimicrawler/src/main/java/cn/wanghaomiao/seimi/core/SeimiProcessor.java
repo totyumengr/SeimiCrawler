@@ -15,26 +15,30 @@
  */
 package cn.wanghaomiao.seimi.core;
 
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.alibaba.fastjson.JSON;
+
 import cn.wanghaomiao.seimi.annotation.Interceptor;
 import cn.wanghaomiao.seimi.def.BaseSeimiCrawler;
 import cn.wanghaomiao.seimi.http.SeimiHttpType;
 import cn.wanghaomiao.seimi.http.hc.HcDownloader;
+import cn.wanghaomiao.seimi.http.okhttp.OkHttpClientBuilderProvider;
 import cn.wanghaomiao.seimi.http.okhttp.OkHttpDownloader;
 import cn.wanghaomiao.seimi.struct.BodyType;
 import cn.wanghaomiao.seimi.struct.CrawlerModel;
 import cn.wanghaomiao.seimi.struct.Request;
 import cn.wanghaomiao.seimi.struct.Response;
 import cn.wanghaomiao.seimi.utils.StructValidator;
-import com.alibaba.fastjson.JSON;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import okhttp3.OkHttpClient;
 
 /**
  * @author github.com/zhegexiaohuozi seimimaster@gmail.com
@@ -45,6 +49,7 @@ public class SeimiProcessor implements Runnable {
     private List<SeimiInterceptor> interceptors;
     private CrawlerModel crawlerModel;
     private BaseSeimiCrawler crawler;
+    private OkHttpClient.Builder hcBuilder;
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     public SeimiProcessor(List<SeimiInterceptor> interceptors, CrawlerModel crawlerModel) {
@@ -52,6 +57,7 @@ public class SeimiProcessor implements Runnable {
         this.interceptors = interceptors;
         this.crawlerModel = crawlerModel;
         this.crawler = crawlerModel.getInstance();
+        this.hcBuilder = OkHttpClientBuilderProvider.getInstance();
     }
 
     private Pattern metaRefresh = Pattern.compile("<(?:META|meta|Meta)\\s+(?:HTTP-EQUIV|http-equiv)\\s*=\\s*\"refresh\".*(?:url|URL)=(\\S*)\".*/?>");
@@ -96,6 +102,7 @@ public class SeimiProcessor implements Runnable {
                     downloader = new HcDownloader(crawlerModel);
                 } else {
                     downloader = new OkHttpDownloader(crawlerModel);
+                    ((OkHttpDownloader) downloader).setHcBuilder(this.hcBuilder);
                 }
 
                 Response seimiResponse = downloader.process(request);
