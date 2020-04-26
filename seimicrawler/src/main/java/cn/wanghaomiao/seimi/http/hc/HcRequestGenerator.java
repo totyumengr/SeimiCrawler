@@ -96,9 +96,10 @@ public class HcRequestGenerator {
                     }
                 }
             }
-            RequestConfig config = RequestConfig.custom().setProxy(crawlerModel.getProxy()).setCircularRedirectsAllowed(true).build();
-
-
+            RequestConfig config = RequestConfig.custom().setConnectTimeout(crawlerModel.getHttpTimeOut())
+            		.setConnectionRequestTimeout(crawlerModel.getHttpTimeOut())
+            		.setSocketTimeout(crawlerModel.getHttpTimeOut())
+            		.setProxy(crawlerModel.getProxy()).setCircularRedirectsAllowed(true).build();
             requestBuilder.setConfig(config).setHeader("User-Agent", crawlerModel.isUseCookie() ? crawlerModel.getCurrentUA() : crawler.getUserAgent());
             requestBuilder.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
             requestBuilder.setHeader("Accept-Language", "zh-CN,zh;q=0.8,en;q=0.6");

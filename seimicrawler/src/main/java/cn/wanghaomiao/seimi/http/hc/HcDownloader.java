@@ -53,12 +53,12 @@ import java.util.List;
  * @since 2016/6/26.
  */
 public class HcDownloader implements SeimiDownloader {
-    public HcDownloader(CrawlerModel crawlerModel) {
+    public HcDownloader(CrawlerModel crawlerModel, String proxyUserName, String proxyPassword) {
         this.crawlerModel = crawlerModel;
         if (crawlerModel.isUseCookie()){
-            hc = HttpClientFactory.getHttpClient(crawlerModel.getHttpTimeOut(),crawlerModel.getCookieStore());
+            hc = HttpClientFactory.getHttpClient(crawlerModel, crawlerModel.getHttpTimeOut(),crawlerModel.getCookieStore(), proxyUserName, proxyPassword);
         }else {
-            hc = HttpClientFactory.getHttpClient(crawlerModel.getHttpTimeOut());
+            hc = HttpClientFactory.getHttpClient(crawlerModel, crawlerModel.getHttpTimeOut(), proxyUserName, proxyPassword);
         }
     }
 
@@ -177,7 +177,11 @@ public class HcDownloader implements SeimiDownloader {
             return null;
         }
         HttpHost t = (HttpHost) target;
-        HttpUriRequest r = (HttpUriRequest)reqUri;
-        return r.getURI().isAbsolute()?r.getURI().toString():t.toString()+r.getURI().toString();
+        if (reqUri instanceof HttpUriRequest) {
+        	HttpUriRequest r = (HttpUriRequest)reqUri;
+            return r.getURI().isAbsolute()?r.getURI().toString():t.toString()+r.getURI().toString();
+        } else {
+        	return currentRequest.getUrl();
+        }
     }
 }

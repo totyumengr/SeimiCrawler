@@ -15,23 +15,31 @@
  */
 package cn.wanghaomiao.seimi.http.hc;
 
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.net.UnknownHostException;
+
+import javax.net.ssl.SSLException;
+
 import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
 
-import javax.net.ssl.SSLException;
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.net.UnknownHostException;
+import cn.wanghaomiao.seimi.struct.CrawlerModel;
 
 /**
  * @author github.com/zhegexiaohuozi seimimaster@gmail.com
@@ -39,18 +47,18 @@ import java.net.UnknownHostException;
  */
 public class HttpClientFactory {
     public static HttpClient getHttpClient() {
-        return cliBuilder(10000).build();
+        return cliBuilder(null, 10000, null, null).build();
     }
 
-    public static HttpClient getHttpClient(int timeout) {
-        return cliBuilder(timeout).build();
+    public static HttpClient getHttpClient(CrawlerModel crawlerModel, int timeout, String proxyUserName, String proxyPassword) {
+        return cliBuilder(crawlerModel, timeout, proxyUserName, proxyPassword).build();
     }
 
-    public static HttpClient getHttpClient(int timeout, CookieStore cookieStore) {
-        return cliBuilder(timeout).setDefaultCookieStore(cookieStore).build();
+    public static HttpClient getHttpClient(CrawlerModel crawlerModel, int timeout, CookieStore cookieStore, String proxyUserName, String proxyPassword) {
+        return cliBuilder(crawlerModel, timeout, proxyUserName, proxyPassword).setDefaultCookieStore(cookieStore).build();
     }
 
-    public static HttpClientBuilder cliBuilder(int timeout) {
+    public static HttpClientBuilder cliBuilder(CrawlerModel crawlerModel, int timeout, String proxyUserName, String proxyPassword) {
         HttpRequestRetryHandler retryHander = new HttpRequestRetryHandler() {
             @Override
             public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
@@ -85,10 +93,24 @@ public class HttpClientFactory {
                 return false;
             }
         };
+        
         RedirectStrategy redirectStrategy = new SeimiRedirectStrategy();
         RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(timeout).setConnectionRequestTimeout(timeout).setSocketTimeout(timeout).build();
         PoolingHttpClientConnectionManager poolingHttpClientConnectionManager = HttpClientConnectionManagerProvider.getHcPoolInstance();
-        return HttpClients.custom().setDefaultRequestConfig(requestConfig).setConnectionManager(poolingHttpClientConnectionManager)
+        HttpClientBuilder builder =  HttpClients.custom().setDefaultRequestConfig(requestConfig).setConnectionManager(poolingHttpClientConnectionManager)
                 .setRedirectStrategy(redirectStrategy).setRetryHandler(retryHander);
+        
+        HttpHost h = crawlerModel.getProxy();
+        if (h != null) {
+        	if (proxyPassword != null && !proxyPassword.isEmpty()) {
+            	CredentialsProvider credsProvider = new BasicCredentialsProvider();
+                credsProvider.setCredentials(
+                        new AuthScope(h.getHostName(), h.getPort()),
+                        new UsernamePasswordCredentials(proxyUserName, proxyPassword));
+                builder.setDefaultCredentialsProvider(credsProvider);
+            }
+        }
+        
+        return builder;
     }
 }
