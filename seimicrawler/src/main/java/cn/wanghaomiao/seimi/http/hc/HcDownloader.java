@@ -141,7 +141,7 @@ public class HcDownloader implements SeimiDownloader {
                         seimiResponse.setCharset(charset.name());
                     }
                 } catch (Exception e) {
-                    logger.error("no content data");
+                    logger.error("no content data", e);
                 }
             }else {
                 seimiResponse.setBodyType(BodyType.BINARY);
