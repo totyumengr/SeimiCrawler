@@ -255,7 +255,19 @@ public class CrawlerModel {
             request.setCallBack(getMethodName(request.getCallBackFunc()));
         }
         queueInstance.push(request);
-        queueInstance.addProcessed(request);
+//        queueInstance.addProcessed(request);
+    }
+    
+    public boolean trySendRequest(Request request) {
+        request.setCrawlerName(crawlerName);
+        if (!checkRequest(request)){
+            return false;
+        }
+        if (request.isLambdaCb()) {
+            request.setCallBack(getMethodName(request.getCallBackFunc()));
+        }
+        return queueInstance.push(request);
+//        queueInstance.addProcessed(request);
     }
 
     public boolean checkRequest(Request request){
@@ -268,7 +280,7 @@ public class CrawlerModel {
     }
 
     public String queueInfo() {
-        Map<String, Object> data = new HashMap<>();
+        Map<String, Object> data = new HashMap<>(2);
         data.put("currentLen", queueInstance.len(getCrawlerName()));
         data.put("total", queueInstance.totalCrawled(getCrawlerName()));
         return JSON.toJSONString(data);

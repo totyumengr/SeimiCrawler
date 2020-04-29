@@ -86,4 +86,15 @@ public class CrawlerCache {
         }
         crawlerModel.sendRequest(request);
     }
+    
+    public static boolean tryConsumeRequest(Request request){
+        if (request == null){
+            throw new  SeimiProcessExcepiton("reques can not be null");
+        }
+        CrawlerModel crawlerModel = getCrawlerModel(request.getCrawlerName());
+        if (crawlerModel == null){
+            throw new  SeimiProcessExcepiton("can not find any crawler named '"+request.getCrawlerName()+"'.");
+        }
+        return crawlerModel.trySendRequest(request);
+    }
 }

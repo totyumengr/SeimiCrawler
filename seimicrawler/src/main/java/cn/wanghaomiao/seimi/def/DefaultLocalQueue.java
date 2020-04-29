@@ -36,7 +36,11 @@ import cn.wanghaomiao.seimi.utils.GenericUtils;
  */
 @Queue
 public class DefaultLocalQueue implements SeimiQueue {
-    private Map<String,LinkedBlockingQueue<Request>> queueMap = new HashMap<>();
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -3048546628939323806L;
+	private Map<String,LinkedBlockingQueue<Request>> queueMap = new HashMap<>();
     private Map<String,ConcurrentSkipListSet<String>> processedData = new HashMap<>();
     private Logger logger = LoggerFactory.getLogger(getClass());
     
@@ -58,9 +62,8 @@ public class DefaultLocalQueue implements SeimiQueue {
     public boolean push(Request req) {
         try {
             LinkedBlockingQueue<Request> queue = getQueue(req.getCrawlerName());
-            queue.put(req);
-            return true;
-        } catch (InterruptedException e) {
+            return queue.offer(req);
+        } catch (Exception e) {
             logger.error(e.getMessage(),e);
         }
         return false;

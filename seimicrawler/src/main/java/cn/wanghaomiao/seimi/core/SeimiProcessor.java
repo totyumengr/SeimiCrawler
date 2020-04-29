@@ -130,7 +130,12 @@ public class SeimiProcessor implements Runnable {
                 }
                 if (request.getCurrentReqCount() < request.getMaxReqCount()) {
                     request.incrReqCount();
-                    queue.push(request);
+                    boolean putInto = queue.push(request);
+                    // Add by MENGRAN. 解决死锁问题。
+                    if (!putInto) {
+                    	// 队列满了。
+                    	crawler.handleErrorRequest(request);
+                    }
                     logger.info("Request process error,req will go into queue again,url={},maxReqCount={},currentReqCount={}", request.getUrl(), request.getMaxReqCount(), request.getCurrentReqCount());
                 } else if (request.getCurrentReqCount() >= request.getMaxReqCount() && request.getMaxReqCount() > 0) {
                     crawler.handleErrorRequest(request);
